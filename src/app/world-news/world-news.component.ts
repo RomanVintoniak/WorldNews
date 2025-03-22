@@ -1,4 +1,5 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -8,7 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NewsCategory } from '../core/enums/news-category.enum';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, Subject, takeUntil } from 'rxjs';
-import { SEARCH_INPUT_DELAY } from '../core/constants/constants';
+import { DEFAULT_PAGE_SIZE, SEARCH_INPUT_DELAY } from '../core/constants/constants';
 import { NewsService } from '../services/news.service';
 import { INewsApiResponseModel } from '../models/news-api-response.model';
 import { NewsCardComponent } from './news-card/news-card.component';
@@ -22,6 +23,7 @@ import { NewsQueryParams } from '../models/query-params.model';
     CommonModule,
     MatFormFieldModule,
     MatProgressSpinnerModule,
+    InfiniteScrollDirective,
     MatSelectModule,
     MatInputModule,
     MatIconModule,
@@ -38,10 +40,15 @@ export class WorldNewsComponent implements OnInit, OnDestroy {
   newsService = inject(NewsService);
 
   newsCategory = NewsCategory;
+  scrollDistance = 1;
+  scrollThrottle = 2000 // 1.2sec;
+
   searchControl = new FormControl('');
   isLoading = false;
+  finished = false;
 
   newsQueryParams: NewsQueryParams = {
+    category: NewsCategory.General,
     page: 1,
   }
 
@@ -65,6 +72,30 @@ export class WorldNewsComponent implements OnInit, OnDestroy {
 
   onCategoryChange(category: NewsCategory) {
     console.log('Chosen category: ', category);
+  }
+
+  onScroll() {
+    if (this.finished) {
+      return;
+    }
+
+    this.isLoading = true;
+    this.newsQueryParams.page++;
+    
+    this.newsService.get(this.newsQueryParams).subscribe({
+      next: (data) => {
+        if (data.articles.length < DEFAULT_PAGE_SIZE) {
+          this.finished = true;
+        }
+
+        this.news.articles = this.news.articles.concat(data.articles);
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.log(error);
+        this.isLoading = false;
+      }
+    });
   }
 
   getNews() {

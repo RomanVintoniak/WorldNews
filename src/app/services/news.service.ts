@@ -4,6 +4,7 @@ import { INewsApiResponseModel } from "../models/news-api-response.model";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { environment } from "../../environments/environment.development";
 import { NewsQueryParams } from "../models/query-params.model";
+import { DEFAULT_PAGE_SIZE } from "../core/constants/constants";
 
 @Injectable({
   providedIn: "root"
@@ -12,7 +13,6 @@ export class NewsService {
   private readonly http = inject(HttpClient);
   private readonly url = environment.apiUrl;
   private readonly apiKey = environment.apiKey;
-  private readonly defaultPageSize = 12;
 
   NewsApiResponse: INewsApiResponseModel = {
     totalResults: 6,
@@ -105,14 +105,10 @@ export class NewsService {
 
   get(params: NewsQueryParams): Observable<INewsApiResponseModel> {
     const httpParams = new HttpParams()
-    .set('country', 'us')
-    .set('pageSize', this.defaultPageSize)
-    .set('page', params.page.toString())
-    .set('apiKey', this.apiKey);
-
-    if (params.category) {
-      httpParams.set('category', params.category);
-    }
+      .set('category', params.category)
+      .set('pageSize', DEFAULT_PAGE_SIZE)
+      .set('page', params.page.toString())
+      .set('apiKey', this.apiKey);
 
     if (params.searchText) {
       httpParams.set('q', params.searchText);
