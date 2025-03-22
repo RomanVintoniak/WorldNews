@@ -1,1 +1,34 @@
-<p>world-news works!</p>
+<div class="main-container">
+  <h2 class="title">World News</h2>
+
+  <div class="filtering-container">
+    <p>Filter by:</p>
+
+    <!-- filtering by category -->
+    <mat-form-field appearance="outline" class="dense-2">
+      <mat-label>Category</mat-label>
+      <mat-select (selectionChange)="onCategoryChange($event.value)">
+        <mat-option value="">All</mat-option>
+        <mat-option [value]="newsCategory.Business">Business</mat-option>
+        <mat-option [value]="newsCategory.Entertainment">Entertainment</mat-option>
+        <mat-option [value]="newsCategory.General">General</mat-option>
+        <mat-option [value]="newsCategory.Health">Health</mat-option>
+        <mat-option [value]="newsCategory.Science">Science</mat-option>
+        <mat-option [value]="newsCategory.Sports">Sports</mat-option>
+        <mat-option [value]="newsCategory.Technology">Technology</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- filtering by keywords -->
+    <mat-form-field appearance="outline" class="dense-2">
+      <input matInput placeholder="Search" [formControl]="searchControl">
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <div class="news-container">
+    <span>123 items found</span>
+  </div>
+</div>

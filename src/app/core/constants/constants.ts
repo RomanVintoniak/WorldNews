@@ -1,0 +1,1 @@
+export const SEARCH_INPUT_DELAY = 700 // 0.7sec
