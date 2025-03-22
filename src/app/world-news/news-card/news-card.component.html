@@ -1,1 +1,11 @@
-<p>news-card works!</p>
+<mat-card class="card" appearance="outlined">
+  <img mat-card-image [src]="article.urlToImage" alt="article" class="card-image">
+  <mat-card-content class="card-content">
+    <p class="author">{{ article.author }}</p>
+    <p class="title">
+      <a [href]="article.url">{{ article.title }}</a> 
+    </p>
+    <p class="description">{{ article.description }}</p>
+    <p class="published-at">{{ article.publishedAt | date : 'MMMM d, y' }}</p>
+  </mat-card-content>
+</mat-card>

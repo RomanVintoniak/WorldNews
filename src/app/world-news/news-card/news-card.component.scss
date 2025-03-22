@@ -1,0 +1,38 @@
+@import '../.././../styles/variables.scss';
+
+:host {
+  flex: 1 1 calc(33.333% - 70px);
+}
+
+.card {
+  background-color: white;
+
+  .card-image {
+    width: 100%;
+    height: auto;
+  }
+
+  .card-content {
+    line-height: 30px;
+
+    .author {
+      padding-top: 5px;
+      color: $primary;
+    }
+
+    .title a {
+      font-size: 20px;
+      font-weight: bold;
+      text-decoration: none;
+      color: black;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    .published-at {
+      color: $primary;
+    }
+  }
+}

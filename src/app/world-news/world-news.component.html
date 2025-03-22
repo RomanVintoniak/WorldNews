@@ -29,6 +29,19 @@
   <mat-divider></mat-divider>
 
   <div class="news-container">
-    <span>123 items found</span>
+    <span>{{ news.totalResults }} items found</span>
+
+    @if (isLoading) {
+      <div class="spinner-container">
+        <mat-spinner [diameter]="70"></mat-spinner>
+      </div>
+    }
+    @else {
+      <div class="cards-container">
+        @for (article of news.articles; track $index) {
+          <app-news-card [article]="article"></app-news-card>
+        }
+      </div>
+    }
   </div>
 </div>
