@@ -1,11 +1,19 @@
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Observable, of } from "rxjs";
 import { INewsApiResponseModel } from "../models/news-api-response.model";
+import { HttpClient, HttpParams } from "@angular/common/http";
+import { environment } from "../../environments/environment.development";
+import { NewsQueryParams } from "../models/query-params.model";
 
 @Injectable({
   providedIn: "root"
 })
 export class NewsService {
+  private readonly http = inject(HttpClient);
+  private readonly url = environment.apiUrl;
+  private readonly apiKey = environment.apiKey;
+  private readonly defaultPageSize = 12;
+
   NewsApiResponse: INewsApiResponseModel = {
     totalResults: 6,
     status: 'ok',
@@ -91,7 +99,25 @@ export class NewsService {
     ]
   };
 
-  get(): Observable<INewsApiResponseModel> {
+  getMocked(): Observable<INewsApiResponseModel> {
     return of(this.NewsApiResponse);
+  }
+
+  get(params: NewsQueryParams): Observable<INewsApiResponseModel> {
+    const httpParams = new HttpParams()
+    .set('country', 'us')
+    .set('pageSize', this.defaultPageSize)
+    .set('page', params.page.toString())
+    .set('apiKey', this.apiKey);
+
+    if (params.category) {
+      httpParams.set('category', params.category);
+    }
+
+    if (params.searchText) {
+      httpParams.set('q', params.searchText);
+    }
+
+    return this.http.get<INewsApiResponseModel>(this.url, { params: httpParams});
   }
 }

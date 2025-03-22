@@ -13,6 +13,7 @@ import { NewsService } from '../services/news.service';
 import { INewsApiResponseModel } from '../models/news-api-response.model';
 import { NewsCardComponent } from './news-card/news-card.component';
 import { CommonModule } from '@angular/common';
+import { NewsQueryParams } from '../models/query-params.model';
 
 @Component({
   selector: 'app-world-news',
@@ -40,6 +41,10 @@ export class WorldNewsComponent implements OnInit, OnDestroy {
   searchControl = new FormControl('');
   isLoading = false;
 
+  newsQueryParams: NewsQueryParams = {
+    page: 1,
+  }
+
   news: INewsApiResponseModel = {
     status: '',
     totalResults: 0,
@@ -64,7 +69,7 @@ export class WorldNewsComponent implements OnInit, OnDestroy {
 
   getNews() {
     this.isLoading = true;
-    this.newsService.get().subscribe({
+    this.newsService.get(this.newsQueryParams).subscribe({
       next: (data) => {
         this.news = data;
         this.isLoading = false;
