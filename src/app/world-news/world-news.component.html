@@ -7,7 +7,7 @@
     <!-- filtering by category -->
     <mat-form-field appearance="outline" class="dense-2">
       <mat-label>Category</mat-label>
-      <mat-select (selectionChange)="onCategoryChange($event.value)">
+      <mat-select [formControl]="selectControl" (selectionChange)="onCategoryChange($event.value)">
         <mat-option [value]="newsCategory.General">General</mat-option>
         <mat-option [value]="newsCategory.Business">Business</mat-option>
         <mat-option [value]="newsCategory.Entertainment">Entertainment</mat-option>

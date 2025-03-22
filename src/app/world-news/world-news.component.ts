@@ -8,7 +8,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NewsCategory } from '../core/enums/news-category.enum';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { debounceTime, Subject, takeUntil } from 'rxjs';
+import { debounceTime, Subject, switchMap, takeUntil, tap } from 'rxjs';
 import { DEFAULT_PAGE_SIZE, SEARCH_INPUT_DELAY } from '../core/constants/constants';
 import { NewsService } from '../services/news.service';
 import { INewsApiResponseModel } from '../models/news-api-response.model';
@@ -41,22 +41,23 @@ export class WorldNewsComponent implements OnInit, OnDestroy {
 
   newsCategory = NewsCategory;
   scrollDistance = 1;
-  scrollThrottle = 2000 // 1.2sec;
+  scrollThrottle = 2000;
 
   searchControl = new FormControl('');
+  selectControl = new FormControl<NewsCategory>(NewsCategory.General);
   isLoading = false;
   finished = false;
 
   newsQueryParams: NewsQueryParams = {
     category: NewsCategory.General,
     page: 1,
-  }
+  };
 
   news: INewsApiResponseModel = {
     status: '',
     totalResults: 0,
     articles: []
-  }
+  };
 
   ngOnInit() {
     this.getNews();
@@ -64,14 +65,27 @@ export class WorldNewsComponent implements OnInit, OnDestroy {
     this.searchControl.valueChanges
       .pipe(
         debounceTime(SEARCH_INPUT_DELAY),
+        tap(() => {
+          this.isLoading = true;
+          this.finished = false;
+        }),
+        switchMap((value) => this.newsService.get({
+          category: this.selectControl.value ?? NewsCategory.General,
+          page: 1,
+          searchText: value ?? ''
+        })),
         takeUntil(this.destroy$)
-      ).subscribe(value => {
-        console.log('Inputted value', value);
+      ).subscribe(data => {
+        this.news = data;
+        this.isLoading = false;
       });
   }
 
   onCategoryChange(category: NewsCategory) {
-    console.log('Chosen category: ', category);
+    this.newsQueryParams.category = category;
+    this.newsQueryParams.page = 1;
+    this.finished = false;
+    this.getNews();
   }
 
   onScroll() {

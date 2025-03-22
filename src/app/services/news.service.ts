@@ -104,14 +104,14 @@ export class NewsService {
   }
 
   get(params: NewsQueryParams): Observable<INewsApiResponseModel> {
-    const httpParams = new HttpParams()
+    let httpParams = new HttpParams()
       .set('category', params.category)
       .set('pageSize', DEFAULT_PAGE_SIZE)
       .set('page', params.page.toString())
       .set('apiKey', this.apiKey);
 
     if (params.searchText) {
-      httpParams.set('q', params.searchText);
+      httpParams = httpParams.set('q', params.searchText);
     }
 
     return this.http.get<INewsApiResponseModel>(this.url, { params: httpParams});
