@@ -9,5 +9,5 @@ import { WorldNewsComponent } from "./world-news/world-news.component";
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'world-news';
+  title = 'World News';
 }

@@ -1,4 +1,4 @@
 export interface ISourceModel {
-  id: string | null;
+  id?: string;
   name: string;
 }

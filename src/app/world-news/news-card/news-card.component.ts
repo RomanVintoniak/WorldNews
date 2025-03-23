@@ -1,7 +1,7 @@
-import { Component, Input } from '@angular/core';
-import { IArticleModel } from '../../models/article.model';
-import { MatCardModule } from '@angular/material/card';
 import { CommonModule } from '@angular/common';
+import { Component, Input } from '@angular/core';
+import { MatCardModule } from '@angular/material/card';
+import { IArticleModel } from '../../models/article.model';
 
 @Component({
   selector: 'app-news-card',

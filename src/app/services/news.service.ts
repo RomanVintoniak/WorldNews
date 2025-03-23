@@ -3,7 +3,7 @@ import { Observable, of } from "rxjs";
 import { INewsApiResponseModel } from "../models/news-api-response.model";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { environment } from "../../environments/environment.development";
-import { NewsQueryParams } from "../models/query-params.model";
+import { INewsQueryParams } from "../models/query-params.model";
 import { DEFAULT_PAGE_SIZE } from "../core/constants/constants";
 
 @Injectable({
@@ -103,7 +103,7 @@ export class NewsService {
     return of(this.NewsApiResponse);
   }
 
-  get(params: NewsQueryParams): Observable<INewsApiResponseModel> {
+  get(params: INewsQueryParams): Observable<INewsApiResponseModel> {
     let httpParams = new HttpParams()
       .set('category', params.category)
       .set('pageSize', DEFAULT_PAGE_SIZE)
