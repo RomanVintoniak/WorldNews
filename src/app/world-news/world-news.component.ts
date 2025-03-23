@@ -7,9 +7,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { InfiniteScrollDirective } from 'ngx-infinite-scroll';
-import { debounceTime, Subject, switchMap, takeUntil, tap } from 'rxjs';
-import { DEFAULT_PAGE_SIZE, SEARCH_INPUT_DELAY } from '../core/constants/constants';
+import { debounceTime, distinctUntilChanged, finalize, Subject, switchMap, takeUntil, tap } from 'rxjs';
+import { DEFAULT_PAGE_SIZE, DEFAULT_SNACKBAR_DURATION, SEARCH_INPUT_DELAY, SERVER_ERROR_MESSAGE } from '../core/constants/constants';
 import { NewsCategory } from '../core/enums/news-category.enum';
 import { INewsApiResponseModel } from '../models/news-api-response.model';
 import { INewsQueryParams } from '../models/query-params.model';
@@ -37,6 +38,7 @@ import { NewsCardComponent } from './news-card/news-card.component';
 export class WorldNewsComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
+  private readonly snackBar = inject(MatSnackBar)
   private readonly newsService = inject(NewsService);
 
   newsCategory = NewsCategory;
@@ -59,12 +61,26 @@ export class WorldNewsComponent implements OnInit, OnDestroy {
     articles: []
   };
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.getNews();
+    this.subscribeToSearchControl();
+  }
 
+  private getNews(): void {
+    this.loading = true;
+    this.newsService.get(this.newsParams)
+    .pipe(finalize(() => this.loading = false))
+    .subscribe({
+      next: (data) => this.news = data,
+      error: () => this.showErrorMessage()
+    });
+  }
+
+  private subscribeToSearchControl(): void {
     this.searchControl.valueChanges
       .pipe(
         debounceTime(SEARCH_INPUT_DELAY),
+        distinctUntilChanged(),
         tap((value) => {
           this.loading = true;
           this.hasNextPage = true;
@@ -72,59 +88,54 @@ export class WorldNewsComponent implements OnInit, OnDestroy {
           this.newsParams.searchText = value ?? ''
         }),
         switchMap(() => this.newsService.get(this.newsParams)),
+        finalize(() => this.loading = false),
         takeUntil(this.destroy$)
-      ).subscribe(data => {
-        this.news = data;
-        this.loading = false;
+      ).subscribe({
+        next: (data) => this.news = data,
+        error: () => this.showErrorMessage()
       });
   }
 
-  onCategoryChange(category: NewsCategory) {
+  onCategoryChange(category: NewsCategory): void {
     this.newsParams.category = category;
     this.newsParams.page = 1;
     this.hasNextPage = true;
     this.getNews();
   }
 
-  onScroll() {
+  onScroll(): void {
     if (!this.hasNextPage) {
       return;
     }
 
     this.loading = true;
     this.newsParams.page++;
-    
-    this.newsService.get(this.newsParams).subscribe({
+
+    this.newsService.get(this.newsParams)
+    .pipe(finalize(() => this.loading = false))
+    .subscribe({
       next: (data) => {
         if (data.articles.length < DEFAULT_PAGE_SIZE) {
           this.hasNextPage = false;
         }
 
         this.news.articles = this.news.articles.concat(data.articles);
-        this.loading = false;
       },
-      error: (error) => {
-        console.log(error);
-        this.loading = false;
-      }
+      error: () => this.showErrorMessage()
     });
   }
 
-  getNews() {
-    this.loading = true;
-    this.newsService.get(this.newsParams).subscribe({
-      next: (data) => {
-        this.news = data;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.log(error);
-        this.loading = false;
+  private showErrorMessage(): void {
+    this.snackBar.open(
+      SERVER_ERROR_MESSAGE,
+      'OK', 
+      {
+        duration: DEFAULT_SNACKBAR_DURATION
       }
-    });
+    );
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
