@@ -1,5 +1,5 @@
 <mat-card class="card" appearance="outlined">
-  <img mat-card-image [src]="article.urlToImage" alt="article" class="card-image">
+  <img mat-card-image [src]="article.urlToImage || 'assets/images/default-news.png'" alt="article" class="card-image">
   <mat-card-content class="card-content">
     <p class="author">{{ article.author }}</p>
     <p class="title">
